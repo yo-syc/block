@@ -1,7 +1,7 @@
 django==5.2.8
 web3==7.6.0
 eth-account==0.13.4
-pillow==10.2.0
+pillow
 qrcode==8.0
 reportlab==4.0.9
 python-decouple==3.8
