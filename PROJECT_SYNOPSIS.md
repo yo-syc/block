@@ -184,53 +184,58 @@ Existing blockchain certificate systems either:
 
 ## 8. PROPOSED METHODOLOGY / SYSTEM APPROACH
 
-### Development Model: **Agile Methodology (Iterative and Incremental)**
+### Development Model: **Incremental Development Approach**
 
-**Justification for Agile:**
-1. **Flexibility:** Blockchain integration requires iterative testing and refinement
-2. **Rapid Prototyping:** Allows early demonstration of core features
-3. **Continuous Feedback:** Enables stakeholder input throughout development
-4. **Risk Management:** Early identification of blockchain integration challenges
-5. **Adaptability:** Can adjust to changing requirements and technology updates
+**Justification for Incremental Development:**
+1. **Phased Implementation:** Each module built and tested before moving to the next
+2. **Risk Mitigation:** Complex blockchain integration handled separately after core features
+3. **Clear Milestones:** Each phase delivers functional component
+4. **Sequential Testing:** Ensures stable foundation before adding complexity
+5. **Resource Efficiency:** Focus on one major component at a time
 
 ### Development Phases:
 
-**Sprint 1 (Week 1-2):** Requirements Analysis & System Design
+**Phase 1 (Week 1-2):** Requirements Analysis & System Design
 - Gather stakeholder requirements
 - Design system architecture
 - Create database schema
 - Design user interface mockups
+- Define project scope and objectives
 
-**Sprint 2 (Week 3-4):** Core System Development
-- Implement Django project structure
+**Phase 2 (Week 3-4):** Core System Development
+- Set up Django project structure
 - Develop user authentication system
-- Create role-based access control
-- Design database models
+- Implement role-based access control
+- Create database models
+- Build basic templates
 
-**Sprint 3 (Week 5-6):** Certificate Management Module
+**Phase 3 (Week 5-6):** Certificate Management Module
 - Build certificate issuance workflow
 - Implement PDF generation
 - Create QR code functionality
 - Develop certificate listing and filtering
+- Implement certificate detail views
 
-**Sprint 4 (Week 7-8):** Blockchain Integration
+**Phase 4 (Week 7-8):** Blockchain Integration
 - Set up Web3.py integration
-- Implement Ethereum wallet connectivity
-- Develop certificate hash storage on blockchain
+- Configure Ethereum wallet connectivity
+- Implement certificate hash storage on blockchain
 - Create blockchain verification logic
+- Handle transaction management
 
-**Sprint 5 (Week 9-10):** Verification System
+**Phase 5 (Week 9-10):** Verification System
 - Build public verification portal
-- Implement QR code scanning
+- Implement certificate search functionality
 - Create verification logging
 - Develop verifier dashboard
+- Test blockchain verification accuracy
 
-**Sprint 6 (Week 11-12):** Testing & Deployment
-- Unit testing
-- Integration testing
-- User acceptance testing
-- Bug fixes and optimization
-- Documentation
+**Phase 6 (Week 11-12):** Testing, Bug Fixes & Deployment
+- System integration testing
+- Security testing
+- Bug identification and resolution
+- Performance optimization
+- Documentation completion
 - Deployment preparation
 
 ### Tools and Technologies:
@@ -823,7 +828,7 @@ CERT:CERT-2025-XXXXXXXX:hash_value
 | 7 | Blockchain Integration I | • Web3.py setup<br>• Infura configuration<br>• Wallet integration | • Blockchain connectivity<br>• Test transactions |
 | 8 | Blockchain Integration II | • Hash storage logic<br>• Transaction handling<br>• Error handling | • Complete blockchain module<br>• Certificate on blockchain |
 | 9 | Verification System | • Verification portal<br>• Blockchain verification<br>• Verification logging | • Working verification system<br>• Public verification page |
-| 10 | Testing & Debugging | • Unit testing<br>• Integration testing<br>• Bug fixes<br>• Performance optimization | • Test reports<br>• Bug-free application |
+| 10 | Testing & Debugging | • Integration testing<br>• Security testing<br>• Bug fixes<br>• Performance optimization | • Test reports<br>• Bug-free application |
 | 11 | Documentation | • Technical documentation<br>• User manual<br>• API documentation<br>• Code comments | • Complete documentation<br>• User guides |
 | 12 | Final Delivery | • Final testing<br>• Demo preparation<br>• Presentation<br>• Project submission | • Final product<br>• Presentation<br>• All deliverables |
 
