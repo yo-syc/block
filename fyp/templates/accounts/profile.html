@@ -31,6 +31,23 @@
                     <h5>Account Info</h5>
                     <p><strong>Username:</strong> {{ user.username }}</p>
                     <p><strong>User Type:</strong> {{ user.get_user_type_display }}</p>
+                    {% if user.user_type == 'institution' %}
+                    <p>
+                        <strong>Status:</strong> 
+                        {% if user.is_approved %}
+                        <span class="badge bg-success">
+                            <i class="bi bi-patch-check-fill"></i> Verified
+                        </span>
+                        {% else %}
+                        <span class="badge bg-warning">
+                            <i class="bi bi-hourglass-split"></i> Pending
+                        </span>
+                        {% endif %}
+                    </p>
+                    {% if user.is_approved and user.approval_date %}
+                    <p class="small text-muted">Approved on: {{ user.approval_date|date:"M d, Y" }}</p>
+                    {% endif %}
+                    {% endif %}
                     <p><strong>Joined:</strong> {{ user.created_at|date:"M d, Y" }}</p>
                 </div>
             </div>

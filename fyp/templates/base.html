@@ -136,6 +136,13 @@
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'certificates:dashboard' %}">Dashboard</a>
                         </li>
+                        {% if user.user_type == 'admin' or user.is_staff %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:pending_institutions' %}">
+                                <i class="bi bi-building-check"></i> Approve Institutions
+                            </a>
+                        </li>
+                        {% endif %}
                         {% if user.user_type == 'institution' %}
                         <li class="nav-item">
                             <a class="nav-link" href="{% url 'certificates:issue_certificate' %}">Issue Certificate</a>

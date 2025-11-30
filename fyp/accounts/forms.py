@@ -26,6 +26,12 @@ class UserRegistrationForm(UserCreationForm):
         super().__init__(*args, **kwargs)
         self.fields['password1'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Password'})
         self.fields['password2'].widget.attrs.update({'class': 'form-control', 'placeholder': 'Confirm Password'})
+        
+        # Remove 'admin' option from user_type choices for public registration
+        self.fields['user_type'].choices = [
+            choice for choice in self.fields['user_type'].choices 
+            if choice[0] not in ['admin', '']
+        ]
 
 
 class UserLoginForm(AuthenticationForm):

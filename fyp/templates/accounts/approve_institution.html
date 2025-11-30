@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Approve Institution{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h4 class="mb-0"><i class="bi bi-check-circle"></i> Approve Institution</h4>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info">
+                        <i class="bi bi-info-circle"></i> You are about to approve this institution. Once approved, they will be able to issue blockchain-verified certificates.
+                    </div>
+                    
+                    <h5 class="mb-3">Institution Details:</h5>
+                    <table class="table table-bordered">
+                        <tr>
+                            <th width="30%">Organization Name:</th>
+                            <td><strong>{{ institution.organization|default:"Not Provided" }}</strong></td>
+                        </tr>
+                        <tr>
+                            <th>Username:</th>
+                            <td>{{ institution.username }}</td>
+                        </tr>
+                        <tr>
+                            <th>Email:</th>
+                            <td>{{ institution.email }}</td>
+                        </tr>
+                        <tr>
+                            <th>Phone:</th>
+                            <td>{{ institution.phone|default:"Not Provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Address:</th>
+                            <td>{{ institution.address|default:"Not Provided" }}</td>
+                        </tr>
+                        <tr>
+                            <th>Registration Date:</th>
+                            <td>{{ institution.created_at|date:"F d, Y H:i" }}</td>
+                        </tr>
+                    </table>
+                    
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'accounts:pending_institutions' %}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg">
+                                <i class="bi bi-check-circle-fill"></i> Approve Institution
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

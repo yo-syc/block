@@ -1,0 +1,110 @@
+{% extends 'base.html' %}
+{% block title %}Institution Approval{% endblock %}
+{% block content %}
+<div class="container py-5">
+    <h2 class="mb-4"><i class="bi bi-building-check"></i> Institution Approval Management</h2>
+    
+    <!-- Pending Institutions -->
+    <div class="card mb-4">
+        <div class="card-header bg-warning text-white">
+            <h5 class="mb-0"><i class="bi bi-hourglass-split"></i> Pending Approval ({{ pending_institutions.count }})</h5>
+        </div>
+        <div class="card-body">
+            {% if pending_institutions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Phone</th>
+                            <th>Registration Date</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for institution in pending_institutions %}
+                        <tr>
+                            <td>
+                                <strong>{{ institution.organization|default:"N/A" }}</strong>
+                            </td>
+                            <td>{{ institution.username }}</td>
+                            <td>{{ institution.email }}</td>
+                            <td>{{ institution.phone|default:"N/A" }}</td>
+                            <td>{{ institution.created_at|date:"M d, Y" }}</td>
+                            <td>
+                                <a href="{% url 'accounts:approve_institution' institution.id %}" 
+                                   class="btn btn-sm btn-success">
+                                    <i class="bi bi-check-circle"></i> Approve
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No pending institutions at the moment.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Approved Institutions -->
+    <div class="card">
+        <div class="card-header bg-success text-white">
+            <h5 class="mb-0"><i class="bi bi-check-circle-fill"></i> Approved Institutions ({{ approved_institutions.count }})</h5>
+        </div>
+        <div class="card-body">
+            {% if approved_institutions %}
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Organization</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Approval Date</th>
+                            <th>Approved By</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for institution in approved_institutions %}
+                        <tr>
+                            <td>
+                                <strong>{{ institution.organization|default:"N/A" }}</strong>
+                                <span class="badge bg-success ms-2">
+                                    <i class="bi bi-patch-check-fill"></i> Verified
+                                </span>
+                            </td>
+                            <td>{{ institution.username }}</td>
+                            <td>{{ institution.email }}</td>
+                            <td>{{ institution.approval_date|date:"M d, Y" }}</td>
+                            <td>{{ institution.approved_by.username }}</td>
+                            <td>
+                                <span class="badge bg-success">Active</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'accounts:revoke_approval' institution.id %}" 
+                                   class="btn btn-sm btn-danger">
+                                    <i class="bi bi-x-circle"></i> Revoke
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle"></i> No approved institutions yet.
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
