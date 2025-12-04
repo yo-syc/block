@@ -211,12 +211,287 @@ A **web-based Django application** that combines **blockchain immutability** wit
 - **JavaScript (AJAX)** - Dynamic interactions
 - **Custom CSS/JS** - Advanced features
 
-### Workflow Architecture
+### System Architecture Diagram
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    SYSTEM WORKFLOW DIAGRAM                      │
-└─────────────────────────────────────────────────────────────────┘
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                    SYSTEM ARCHITECTURE OVERVIEW                                ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                           PRESENTATION LAYER                                   │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌─────────────────┐  ┌─────────────────┐  ┌─────────────────────────────┐ │
+│  │  Institution    │  │  Admin Panel    │  │  Public Verification Portal │ │
+│  │  Portal         │  │                 │  │                             │ │
+│  ├─────────────────┤  ├─────────────────┤  ├─────────────────────────────┤ │
+│  │ • Login         │  │ • Dashboard     │  │ • QR Code Scan              │ │
+│  │ • Dashboard     │  │ • Approve       │  │ • Manual Entry              │ │
+│  │ • Issue Cert    │  │   Institutions  │  │ • Image Upload (OCR)        │ │
+│  │ • View History  │  │ • View All      │  │ • Real-time Results         │ │
+│  │ • Download PDF  │  │   Certificates  │  │ • Certificate Details       │ │
+│  └────────┬────────┘  └────────┬────────┘  └──────────────┬──────────────┘ │
+│           │                    │                           │                 │
+│           └────────────────────┼───────────────────────────┘                 │
+│                                │                                             │
+└────────────────────────────────┼─────────────────────────────────────────────┘
+                                 │
+                                 ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                         APPLICATION LAYER (Django)                            │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌──────────────────────────────────────────────────────────────────────┐   │
+│  │                         Django Backend (Python)                       │   │
+│  ├──────────────────────────────────────────────────────────────────────┤   │
+│  │                                                                       │   │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────────┐    │   │
+│  │  │  Authentication │  │  Certificate    │  │  Verification    │    │   │
+│  │  │  Module         │  │  Management     │  │  Engine          │    │   │
+│  │  ├─────────────────┤  ├─────────────────┤  ├──────────────────┤    │   │
+│  │  │ • User Login    │  │ • Create Cert   │  │ • Layer 1: DB    │    │   │
+│  │  │ • Registration  │  │ • Generate Hash │  │ • Layer 2: Hash  │    │   │
+│  │  │ • Role-Based    │  │ • Store Data    │  │ • Layer 3: Chain │    │   │
+│  │  │   Access (RBAC) │  │ • PDF Generate  │  │ • Result Logic   │    │   │
+│  │  │ • Approval Flow │  │ • QR Generate   │  │ • Tamper Alert   │    │   │
+│  │  └─────────────────┘  └─────────────────┘  └──────────────────┘    │   │
+│  │                                                                       │   │
+│  │  ┌─────────────────┐  ┌─────────────────┐  ┌──────────────────┐    │   │
+│  │  │  Institution    │  │  Blockchain     │  │  OCR/AI Module   │    │   │
+│  │  │  Approval       │  │  Integration    │  │  (Tesseract)     │    │   │
+│  │  ├─────────────────┤  ├─────────────────┤  ├──────────────────┤    │   │
+│  │  │ • Pending List  │  │ • Web3.py       │  │ • Image Preproc  │    │   │
+│  │  │ • Approve/      │  │ • Store Hash    │  │ • Text Extract   │    │   │
+│  │  │   Reject        │  │ • Verify Hash   │  │ • Pattern Match  │    │   │
+│  │  │ • Audit Trail   │  │ • Transaction   │  │ • LSTM Network   │    │   │
+│  │  │ • Revoke Access │  │   Monitoring    │  │ • Auto Verify    │    │   │
+│  │  └─────────────────┘  └─────────────────┘  └──────────────────┘    │   │
+│  │                                                                       │   │
+│  └───────────────────────────────┬───────────────────────────────────────┘   │
+│                                  │                                           │
+└──────────────────────────────────┼───────────────────────────────────────────┘
+                                   │
+                     ┌─────────────┼─────────────┐
+                     │             │             │
+                     ▼             ▼             ▼
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                           DATA/STORAGE LAYER                                   │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌─────────────────────┐  ┌──────────────────────┐  ┌──────────────────┐   │
+│  │   SQLite/PostgreSQL │  │  Ethereum Blockchain │  │  File Storage    │   │
+│  │   Database          │  │  (Sepolia Testnet)   │  │  (Media Files)   │   │
+│  ├─────────────────────┤  ├──────────────────────┤  ├──────────────────┤   │
+│  │                     │  │                      │  │                  │   │
+│  │ Tables:             │  │ Smart Contract:      │  │ Stored Files:    │   │
+│  │ ├─ Users            │  │ ├─ storeCertificate  │  │ ├─ PDF Certs    │   │
+│  │ │  ├─ username      │  │ │   Hash()           │  │ ├─ QR Codes     │   │
+│  │ │  ├─ email         │  │ │                    │  │ ├─ Institution  │   │
+│  │ │  ├─ is_approved   │  │ ├─ getCertificate   │  │ │   Logos        │   │
+│  │ │  ├─ approval_date │  │ │   Hash()           │  │ └─ Uploaded     │   │
+│  │ │  └─ approved_by   │  │ │                    │  │    Images (OCR) │   │
+│  │ │                   │  │ └─ Event Logs        │  │                  │   │
+│  │ ├─ Certificates     │  │                      │  │ Path:            │   │
+│  │ │  ├─ cert_id       │  │ Network:             │  │ media/           │   │
+│  │ │  ├─ student_name  │  │ • Infura RPC         │  │ ├─certificates/ │   │
+│  │ │  ├─ course_name   │  │ • Sepolia Chain ID   │  │ ├─logos/        │   │
+│  │ │  ├─ issue_date    │  │ • Gas Optimized      │  │ └─uploads/      │   │
+│  │ │  ├─ institution   │  │ • Transaction Hash   │  │                  │   │
+│  │ │  ├─ cert_hash     │  │                      │  │                  │   │
+│  │ │  ├─ blockchain_tx │  │ Data Stored:         │  │                  │   │
+│  │ │  └─ pdf_path      │  │ • cert_id → hash     │  │                  │   │
+│  │ │                   │  │ • Timestamp          │  │                  │   │
+│  │ └─ AuditLogs        │  │ • Immutable          │  │                  │   │
+│  │    ├─ action        │  │                      │  │                  │   │
+│  │    ├─ user          │  │                      │  │                  │   │
+│  │    ├─ timestamp     │  │                      │  │                  │   │
+│  │    └─ details       │  │                      │  │                  │   │
+│  │                     │  │                      │  │                  │   │
+│  └─────────────────────┘  └──────────────────────┘  └──────────────────┘   │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                      EXTERNAL SERVICES & LIBRARIES                             │
+├───────────────────────────────────────────────────────────────────────────────┤
+│                                                                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐ │
+│  │   Infura     │  │  Tesseract   │  │   ReportLab  │  │   Bootstrap 5   │ │
+│  │   Web3 API   │  │   OCR Engine │  │   PDF Gen    │  │   Frontend      │ │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └─────────────────┘ │
+│                                                                               │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌─────────────────┐ │
+│  │   QRCode     │  │   Pillow     │  │  Hashlib     │  │   Django Auth   │ │
+│  │   Generator  │  │   Image Proc │  │  SHA-256     │  │   Security      │ │
+│  └──────────────┘  └──────────────┘  └──────────────┘  └─────────────────┘ │
+│                                                                               │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                         DATA FLOW ARCHITECTURE                                 ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+CERTIFICATE ISSUANCE FLOW:
+═══════════════════════════════
+
+Institution Portal → Django Backend → Hash Generation → Dual Storage
+                                            │                    │
+                                            │                    ├─► Database (cert data)
+                                            │                    │
+                                            └────────────────────└─► Blockchain (hash only)
+                                                                 │
+                                                                 ▼
+                                                    PDF + QR Generation
+                                                                 │
+                                                                 ▼
+                                                         File Storage (media/)
+                                                                 │
+                                                                 ▼
+                                                      Certificate Download
+
+
+VERIFICATION FLOW:
+═══════════════════
+
+Verifier Input (QR/Manual/Image)
+        │
+        ├─── If Image Upload ───► OCR Processing ───► Extract Cert ID
+        │                              │
+        └──────────────────────────────┴───► Certificate ID
+                                              │
+                                              ▼
+                                    Verification Engine
+                                              │
+                    ┌─────────────────────────┼─────────────────────────┐
+                    ▼                         ▼                         ▼
+            LAYER 1: DATABASE         LAYER 2: HASH            LAYER 3: BLOCKCHAIN
+                    │                         │                         │
+            Fetch Certificate         Recalculate Hash          Query Smart Contract
+                    │                         │                         │
+            Get stored_hash           Compare with stored       Compare with blockchain
+                    │                         │                         │
+                    └─────────────────────────┴─────────────────────────┘
+                                              │
+                                              ▼
+                                      Verification Logic
+                                              │
+                    ┌─────────────────────────┼─────────────────────────┐
+                    ▼                         ▼                         ▼
+            All Match: VALID      Hash Mismatch: TAMPERED    Not Found: INVALID
+                    │                         │                         │
+                    └─────────────────────────┴─────────────────────────┘
+                                              │
+                                              ▼
+                                    Display Result to Verifier
+
+
+SECURITY ARCHITECTURE:
+═══════════════════════
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│                      THREE-LAYER SECURITY MODEL                          │
+└─────────────────────────────────────────────────────────────────────────┘
+
+Layer 1: Application Security (Django)
+├─ Authentication & Authorization
+│  ├─ Password hashing (PBKDF2)
+│  ├─ Session management
+│  ├─ CSRF protection
+│  └─ Role-based access control
+│
+├─ Input Validation
+│  ├─ Form validation
+│  ├─ SQL injection prevention
+│  └─ XSS protection
+│
+└─ Admin Approval System
+   ├─ Manual institution verification
+   ├─ Approval audit trail
+   └─ Revocation capability
+
+Layer 2: Cryptographic Security
+├─ SHA-256 Hashing
+│  ├─ Certificate data → unique hash
+│  ├─ Any change → different hash
+│  └─ One-way function (cannot reverse)
+│
+├─ Hash Storage
+│  ├─ Database (for quick lookup)
+│  └─ Blockchain (for immutability)
+│
+└─ Tamper Detection
+   ├─ Recalculate hash on verification
+   ├─ Compare with stored hash
+   └─ Instant tampering detection
+
+Layer 3: Blockchain Immutability
+├─ Ethereum Smart Contract
+│  ├─ Permanent hash storage
+│  ├─ Cannot be modified or deleted
+│  └─ Transparent and auditable
+│
+├─ External Proof
+│  ├─ Independent verification source
+│  ├─ Protection against database compromise
+│  └─ Transaction history preserved
+│
+└─ Distributed Consensus
+   ├─ Multiple nodes validate
+   ├─ Network-level security
+   └─ Attack-resistant architecture
+
+
+ATTACK PREVENTION MATRIX:
+═══════════════════════════
+
+Attack Type              | Detection Method           | Prevention Layer
+─────────────────────────┼───────────────────────────┼─────────────────────
+PDF Forgery              | Verify cert_id only        | All layers
+Database Tampering       | Blockchain hash mismatch   | Layer 3 (Blockchain)
+Hash Modification        | Recalculation comparison   | Layer 2 (Crypto)
+SQL Injection            | Django ORM protection      | Layer 1 (Django)
+Unauthorized Access      | Authentication required    | Layer 1 (Django)
+Man-in-the-Middle        | HTTPS encryption           | Transport layer
+Smart Contract Exploit   | Audited contract code      | Layer 3 (Blockchain)
+Brute Force              | Rate limiting              | Layer 1 (Django)
+
+
+SYSTEM INTEGRATION DIAGRAM:
+════════════════════════════
+
+                            [User Interface]
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+              [Institution]    [Admin]      [Verifier]
+                    │              │              │
+                    └──────────────┼──────────────┘
+                                   │
+                                   ▼
+                          [Django Application]
+                                   │
+                    ┌──────────────┼──────────────┐
+                    │              │              │
+                    ▼              ▼              ▼
+            [Authentication]  [Business     [Verification]
+            [Module]          Logic]        [Engine]
+                    │              │              │
+                    └──────────────┼──────────────┘
+                                   │
+                    ┌──────────────┼──────────────────────┐
+                    │              │              │        │
+                    ▼              ▼              ▼        ▼
+            [SQLite DB]    [Ethereum      [PDF Gen]  [OCR Engine]
+                           Blockchain]    [ReportLab] [Tesseract]
+                                   │
+                           [Infura API Gateway]
+                                   │
+                           [Sepolia Testnet]
+```
+
+### Workflow Architecture
 
 ┌───────────────────────────────────────────────────────────────────────┐
 │ PHASE 1: INSTITUTION ONBOARDING                                       │
