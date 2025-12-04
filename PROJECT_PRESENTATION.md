@@ -211,6 +211,378 @@ A **web-based Django application** that combines **blockchain immutability** wit
 - **JavaScript (AJAX)** - Dynamic interactions
 - **Custom CSS/JS** - Advanced features
 
+### Complete System Block Diagram - Data Flow & Role Management
+
+```
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                   COMPLETE SYSTEM BLOCK DIAGRAM                                ║
+║                   (Data Flow & Role-Based Architecture)                        ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────────┐
+│                            USER ROLES & ENTRY POINTS                           │
+└───────────────────────────────────────────────────────────────────────────────┘
+
+    ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+    │   INSTITUTION   │      │   ADMIN USER    │      │    VERIFIER     │
+    │   (Role: Inst)  │      │  (Role: Admin)  │      │ (Role: Public)  │
+    └────────┬────────┘      └────────┬────────┘      └────────┬────────┘
+             │                        │                        │
+             │                        │                        │
+             ▼                        ▼                        ▼
+    ┌─────────────────┐      ┌─────────────────┐      ┌─────────────────┐
+    │ /institution/   │      │   /admin/       │      │   /verify/      │
+    │  register       │      │   login         │      │  (No login)     │
+    └────────┬────────┘      └────────┬────────┘      └────────┬────────┘
+             │                        │                        │
+             │                        │                        │
+             └────────────────────────┼────────────────────────┘
+                                      │
+                                      ▼
+        ╔═══════════════════════════════════════════════════════════════╗
+        ║              AUTHENTICATION GATEWAY                           ║
+        ║              (Django Authentication System)                   ║
+        ╚═══════════════════════════════════════════════════════════════╝
+                                      │
+                    ┌─────────────────┼─────────────────┐
+                    ▼                 ▼                 ▼
+        ┌──────────────────┐  ┌──────────────┐  ┌───────────────────┐
+        │ Institution Flow │  │  Admin Flow  │  │ Public Verify Flow│
+        └──────────────────┘  └──────────────┘  └───────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                        INSTITUTION USER FLOW                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+Step 1: REGISTRATION
+────────────────────
+    [Institution Opens Website]
+             │
+             ▼
+    ┌────────────────────────┐
+    │ URL: /register/        │
+    │ VIEW: register_view()  │
+    │ TEMPLATE: register.html│
+    └───────────┬────────────┘
+                │
+                ▼
+    [User Fills Registration Form]
+    ┌─────────────────────────────┐
+    │ Fields:                     │
+    │ • Username                  │
+    │ • Email                     │
+    │ • Password                  │
+    │ • Institution Name          │
+    │ • Institution Type          │
+    │ • Contact Info              │
+    └───────────┬─────────────────┘
+                │
+                ▼ (Submit Button)
+    ┌────────────────────────────────────┐
+    │ DJANGO BACKEND                     │
+    │ ────────────────────────────────── │
+    │ File: accounts/views.py            │
+    │ Function: register_view()          │
+    │                                    │
+    │ def register_view(request):        │
+    │     if request.method == 'POST':   │
+    │         form = RegisterForm(...)   │
+    │         if form.is_valid():        │
+    │             user = form.save()     │
+    │             user.is_approved=False │
+    │             user.save()            │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    ┌────────────────────────────────────┐
+    │ DATABASE OPERATION                 │
+    │ ────────────────────────────────── │
+    │ Table: accounts_customuser         │
+    │                                    │
+    │ INSERT INTO accounts_customuser    │
+    │ VALUES (                           │
+    │   username = 'inst_abc',           │
+    │   email = 'abc@inst.edu',          │
+    │   password = 'hashed_password',    │
+    │   institution_name = 'ABC College',│
+    │   is_approved = FALSE,             │
+    │   approval_date = NULL,            │
+    │   approved_by = NULL               │
+    │ )                                  │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    [Registration Success Message]
+    "Account created! Waiting for admin approval"
+                │
+                ▼
+    [Institution Cannot Login Yet]
+    (is_approved = False)
+
+
+Step 2: ADMIN APPROVAL PROCESS
+───────────────────────────────
+    [Admin Logs In]
+             │
+             ▼
+    ┌────────────────────────┐
+    │ URL: /admin/dashboard/ │
+    │ VIEW: admin_dashboard()│
+    └───────────┬────────────┘
+                │
+                ▼
+    ┌────────────────────────────────────┐
+    │ BACKEND: Fetch Pending Institutions│
+    │ ────────────────────────────────── │
+    │ File: accounts/views.py            │
+    │                                    │
+    │ def admin_dashboard(request):      │
+    │     pending = CustomUser.objects   │
+    │         .filter(is_approved=False) │
+    │         .filter(user_type='inst')  │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    ┌────────────────────────────────────┐
+    │ DATABASE QUERY                     │
+    │ ────────────────────────────────── │
+    │ SELECT * FROM accounts_customuser  │
+    │ WHERE is_approved = FALSE          │
+    │   AND user_type = 'institution'    │
+    └───────────┬────────────────────────┘
+                │
+                ▼ (Data Flows Back)
+    ┌────────────────────────────────────┐
+    │ TEMPLATE: admin_dashboard.html     │
+    │                                    │
+    │ Shows List:                        │
+    │ ┌────────────────────────────────┐ │
+    │ │ ABC College | abc@inst.edu     │ │
+    │ │ [Approve] [Reject]             │ │
+    │ └────────────────────────────────┘ │
+    └───────────┬────────────────────────┘
+                │
+                ▼ (Admin clicks Approve)
+    ┌────────────────────────────────────┐
+    │ URL: /admin/approve/<user_id>/     │
+    │ VIEW: approve_institution()        │
+    │ ────────────────────────────────── │
+    │ File: accounts/views.py            │
+    │                                    │
+    │ def approve_institution(request,   │
+    │                         user_id):  │
+    │     user = get_object_or_404(      │
+    │         CustomUser, id=user_id)    │
+    │     user.is_approved = True        │
+    │     user.approval_date = now()     │
+    │     user.approved_by = request.user│
+    │     user.save()                    │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    ┌────────────────────────────────────┐
+    │ DATABASE UPDATE                    │
+    │ ────────────────────────────────── │
+    │ UPDATE accounts_customuser         │
+    │ SET is_approved = TRUE,            │
+    │     approval_date = '2025-12-04',  │
+    │     approved_by_id = 1             │
+    │ WHERE id = user_id                 │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    [Institution Account APPROVED]
+    [Institution can now LOGIN]
+
+
+Step 3: INSTITUTION LOGIN
+──────────────────────────
+    [Institution Opens Login Page]
+             │
+             ▼
+    ┌────────────────────────┐
+    │ URL: /login/           │
+    │ VIEW: login_view()     │
+    │ TEMPLATE: login.html   │
+    └───────────┬────────────┘
+                │
+                ▼
+    [User Enters Credentials]
+    ┌─────────────────────┐
+    │ Username: inst_abc  │
+    │ Password: ********  │
+    └───────────┬─────────┘
+                │
+                ▼ (Submit)
+    ┌────────────────────────────────────┐
+    │ BACKEND: Authentication            │
+    │ ────────────────────────────────── │
+    │ File: accounts/views.py            │
+    │                                    │
+    │ def login_view(request):           │
+    │     username = request.POST['user']│
+    │     password = request.POST['pass']│
+    │     user = authenticate(           │
+    │         username=username,         │
+    │         password=password)         │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    ┌────────────────────────────────────┐
+    │ DATABASE QUERY                     │
+    │ ────────────────────────────────── │
+    │ SELECT * FROM accounts_customuser  │
+    │ WHERE username = 'inst_abc'        │
+    │   AND password_hash = verify(pass) │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    ┌────────────────────────────────────┐
+    │ CHECK APPROVAL STATUS              │
+    │ ────────────────────────────────── │
+    │ if user.is_approved == False:      │
+    │     return "Account not approved"  │
+    │ elif user.is_approved == True:     │
+    │     login(request, user)           │
+    │     return redirect('dashboard')   │
+    └───────────┬────────────────────────┘
+                │
+                ▼
+    [LOGIN SUCCESS]
+    [Redirect to Institution Dashboard]
+
+
+Step 4: CERTIFICATE ISSUANCE
+─────────────────────────────
+    [Institution Dashboard]
+             │
+             ▼
+    ┌────────────────────────────┐
+    │ URL: /dashboard/           │
+    │ VIEW: institution_dashboard│
+    │ TEMPLATE: dashboard.html   │
+    └───────────┬────────────────┘
+                │
+                ▼
+    [Click "Issue New Certificate"]
+             │
+             ▼
+    ┌────────────────────────────┐
+    │ URL: /issue-certificate/   │
+    │ VIEW: issue_certificate()  │
+    │ TEMPLATE: issue_form.html  │
+    └───────────┬────────────────┘
+                │
+                ▼
+    [Fill Certificate Form]
+    ┌─────────────────────────┐
+    │ Student Name: John Doe  │
+    │ Email: john@email.com   │
+    │ Course: Web Development │
+    │ Issue Date: 2025-12-04  │
+    │ Grade: A+               │
+    └───────────┬─────────────┘
+                │
+                ▼ (Submit)
+    ┌─────────────────────────────────────────────────────────┐
+    │ DJANGO BACKEND - Certificate Processing                 │
+    │ ─────────────────────────────────────────────────────── │
+    │ File: certificates/views.py                             │
+    │ Function: issue_certificate_view()                      │
+    │                                                         │
+    │ Step 1: Generate Certificate ID                         │
+    │ ─────────────────────────────                           │
+    │ cert_id = f"CERT-{datetime.now().year}-{random_num}"   │
+    │ # Output: CERT-2025-12345678                            │
+    │                                                         │
+    │ Step 2: Create Hash                                     │
+    │ ─────────────────────                                   │
+    │ import hashlib                                          │
+    │ data = f"{cert_id}|{student_name}|{course}|{date}|..."  │
+    │ certificate_hash = hashlib.sha256(                      │
+    │     data.encode()                                       │
+    │ ).hexdigest()                                           │
+    │ # Output: a3f5b9c2d8e1f4g7...                           │
+    │                                                         │
+    │ Step 3: Save to Database                                │
+    │ ────────────────────────                                │
+    │ certificate = Certificate.objects.create(               │
+    │     cert_id = cert_id,                                  │
+    │     student_name = student_name,                        │
+    │     course_name = course_name,                          │
+    │     issue_date = issue_date,                            │
+    │     grade = grade,                                      │
+    │     institution = request.user.institution,             │
+    │     certificate_hash = certificate_hash,                │
+    │     issued_by = request.user                            │
+    │ )                                                       │
+    └───────────┬─────────────────────────────────────────────┘
+                │
+                ▼
+    [DATABASE INSERT] → [BLOCKCHAIN STORAGE] → [PDF GENERATION]
+                │                 │                    │
+                ▼                 ▼                    ▼
+         Store cert data    Store hash only      Generate PDF
+         in certificates    on Ethereum          with QR code
+         table              Sepolia              │
+                │                 │               │
+                └─────────────────┴───────────────┘
+                                  │
+                                  ▼
+                        [Certificate Ready]
+                                  │
+                                  ▼
+                        [Download to Institution]
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                        PUBLIC VERIFICATION FLOW                                ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+    [Verifier Access] → [Enter Cert ID / Scan QR / Upload Image]
+             │
+             ▼
+    ┌────────────────────────┐
+    │ URL: /verify/          │
+    │ VIEW: verify_view()    │
+    └───────────┬────────────┘
+                │
+                ▼
+    [LAYER 1: Database Query] → SELECT certificate WHERE cert_id = ?
+                │
+                ▼
+    [LAYER 2: Hash Recalculation] → Compare stored_hash vs recalculated_hash
+                │
+                ▼
+    [LAYER 3: Blockchain Query] → Compare blockchain_hash vs database_hash
+                │
+                ▼
+    [ALL PASS?] ──YES──→ [Display: VALID ✅]
+         │
+         NO
+         │
+         ▼
+    [Display: TAMPERED ⚠️ or NOT FOUND ❌]
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                   COMPLETE DATA FLOW SUMMARY                                   ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+USER INPUT → URL ROUTING → VIEW FUNCTION → BACKEND LOGIC → DATABASE QUERY
+          → DATA PROCESSING → TEMPLATE RENDERING → HTML RESPONSE → USER DISPLAY
+
+ROLES INTERACTION:
+┌─────────────┐         ┌─────────────┐         ┌─────────────┐
+│ Institution │────────→│    Admin    │────────→│  Verifier   │
+│  Registers  │         │  Approves   │         │  Verifies   │
+└─────────────┘         └─────────────┘         └─────────────┘
+      │                       │                        │
+      ▼                       ▼                        ▼
+  Can Issue Certs     Monitors System         Gets Instant Result
+```
+
 ### System Architecture Diagram
 
 ```
